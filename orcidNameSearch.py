@@ -21,22 +21,14 @@ ns = {'o': 'http://www.orcid.org/ns/orcid' ,
 
 
 
-def getData( firstName , lastName  ):
-
-    queryName = firstName + ' ' + lastName
-    print(queryName)
-
+def getData(firstName, lastName):
+    """Retrieve information of ORCID account using the given first and last name."""
     fullOutput = ''
 
+    # The used query to retrieve information.
     query = f'https://pub.orcid.org/v2.1/search?q=family-name:{ urlEncode(lastName) }+AND+given-names:{ urlEncode(firstName)}'
     root = getTree( query )
     hits = root.findall('s:result' , ns )
-
-    # if len(hits) == 0:
-    #     queryName = urlEncode( queryName )
-    #     query = "https://pub.orcid.org/v3.0/search?q=" + queryName
-    #     root = getTree( query )
-    #     hits = root.findall('s:result' , ns )
 
     count = 0
     for result in hits:
@@ -54,6 +46,7 @@ def getData( firstName , lastName  ):
         data['nrWorks'] = getNumberOfWorks( xml )
         aff = getAffiliations( xml )
         for affiliation in aff:
+            # Check if the account is associated to the University of Applied Sciences Utrecht or Hogeschool Utrecht
             if(('University of Applied Sciences Utrecht' in affiliation) or ('Hogeschool Utrecht' in affiliation)):
                 fullOutput += f"{ lastName },"
                 fullOutput += f"{ firstName },"
@@ -79,11 +72,11 @@ def getData( firstName , lastName  ):
 
     return fullOutput
 
-
-out = open( 'researchers.csv' , 'w' )
+# Write the output to a CSV file.
+out = open( 'result.csv' , 'w' )
 out.write( 'lastName,firstName,orcid,OrcidlastName,OrcidfirstName,creationDate,nrWorks,organisation1,department1,organisation2,department2\n' )
 
-
+# Open the Excel file which contains the names used to retrieve data.
 xl = pd.ExcelFile( 'researchers.xlsx'  )
 df = xl.parse( 'Sheet1' )
 for index , column in df.iterrows():
